@@ -3,11 +3,10 @@
 
 var VSHADER_SOURCE = `
   attribute vec4 a_Position;
-  uniform float u_Size;
+  uniform mat4 u_ModelMatrix;
+  uniform mat4 u_GlobalRotateMatrix;
   void main() {
-    gl_Position = a_Position;
-    //gl_PointSize = 30.0;
-    gl_PointSize = u_Size;
+    gl_Position = u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
   }`;
 
 // Fragment shader program
@@ -18,19 +17,21 @@ var FSHADER_SOURCE = `
     gl_FragColor = u_FragColor;
   }`;
 
-let canvas, gl, a_Position, u_fragColor, u_Size; // Global variables
+let canvas, gl, a_Position, u_fragColor, u_Size, u_ModelMatrix, u_GlobalRotateMatrix; // Global variables
 
 function setupWebGL() {
   // Retrieve <canvas> element
   canvas = document.getElementById('webgl');
 
   // Get the rendering context for WebGL
+  // gl = getWebGLContext(canvas);
   gl = canvas.getContext("webgl", { preserveDrawingBuffer: true });
   if (!gl) {
     console.log('Failed to get the rendering context for WebGL');
     return;
   }
-  gl.enable(gl.DEPTH_TEST);
+
+  //gl.enable(gl.DEPTH_TEST);
 }
 
 function connectVariablesToGLSL() {
@@ -54,25 +55,35 @@ function connectVariablesToGLSL() {
     return;
   }
 
-  // Get the storage location of u_Size
-  u_Size = gl.getUniformLocation(gl.program, 'u_Size');
-  if (!u_Size) {
-    console.log('Failed to get the storage location of u_Size');
+  // Get the storage location of u_ModelMatrix
+  u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+  if (!u_ModelMatrix) {
+    console.log('Failed to get the storage location of u_ModelMatrix');
     return;
   }
+
+  // Get the storage location of u_GlobalRotateMatrix
+  u_GlobalRotateMatrix = gl.getUniformLocation(gl.program, 'u_GlobalRotateMatrix');
+  if (!u_GlobalRotateMatrix) {
+    console.log('Failed to get the storage location of u_GlobalRotateMatrix');
+    return;
+  }
+
+  // Set an initial value for the matrix to identify
+  var identityM = new Matrix4();
+  gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
 }
 
 // Constants
 const POINT = 0;
 const TRIANGLE = 1;
 const CIRCLE = 2;
-const DRAWING = 3;
 
 // Globals related to UI elements
 let g_selectedColor = [1.0, 0.0, 0.0, 1.0];
 let g_selectedSize = 5;
-let g_selectedSegment = 10;
 let g_selectedType = POINT;
+let g_globalAngle = 0;
 
 // Set up actions for the HTMl UI elements
 function addActionsForHTMLUI() {
@@ -90,14 +101,9 @@ function addActionsForHTMLUI() {
   document.getElementById('greenSlide').addEventListener('mouseup', function () { g_selectedColor[1] = this.value / 100; });
   document.getElementById('blueSlide').addEventListener('mouseup', function () { g_selectedColor[2] = this.value / 100; });
 
-  // Size Slider Events
-  document.getElementById('sizeSlide').addEventListener('mouseup', function () { g_selectedSize = this.value; });
-
-  // Segment Slider Events
-  document.getElementById('segmentSlide').addEventListener('mouseup', function () { g_selectedSegment = this.value; });
-
-  // Drawing Button Events
-  document.getElementById('drawingButton').onclick = function () { g_selectedType = DRAWING; };
+  // Angle Slider Events
+  // document.getElementById('angleSlide').addEventListener('mouseup', function () { g_globalAngle = this.value; renderAllShapes(); });
+  document.getElementById('angleSlide').addEventListener('mousemove', function () { g_globalAngle = this.value; renderAllShapes(); });
 }
 
 function main() {
@@ -109,7 +115,6 @@ function main() {
   // Set up actions for the HTML UI elements
   addActionsForHTMLUI();
 
-
   // Register function (event handler) to be called on a mouse press
   canvas.onmousedown = click;
   //canvas.onmousemove = click;
@@ -118,10 +123,8 @@ function main() {
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
-  // Clear <canvas>
-  //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-  // Render all shapes (needed for performance reasons)
+  // Render
+  //gl.clear(gl.COLOR_BUFFER_BIT);
   renderAllShapes();
 }
 
@@ -198,38 +201,52 @@ function convertCoordinatesEventToGL(ev) {
   return ([x, y]);
 }
 
-function renderAllShapes() {// I could not include the perfomance montoring code because I do not have NodeJS setup
+function renderAllShapes() {// I could not include the performance monitoring code because I do not have NodeJS setup
   // Check the time at the start of the function
-  // var startTime = perfomance.now();
+  var startTime = performance.now();
+
+  // Pass the matrix to u_ModelMatrix attribute
+  var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
+  gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
   // Clear <canvas>
+  // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  // Draw every shape in the list
-  //var len = g_shapesList.length;
-  //for (var i = 0; i < len; i++) {
-  //g_shapesList[i].render();
-  //}
-
-  // Draw a test triangle
-  drawTriangle3D([-1.0, 0.0, 0.0, -0.5, -1.0, 0.0, 0.0, 0.0, 0.0]);
-
-  // Draw a cube
+  // Draw the body cube
   var body = new Cube();
   body.color = [1.0, 0.0, 0.0, 1.0];
+  body.matrix.translate(-0.25, -0.5, 0.0);
+  body.matrix.scale(0.5, 1, 0.5);
   body.render();
 
+  // Draw a left arm
+  var leftArm = new Cube();
+  leftArm.color = [1, 1, 0, 1];
+  leftArm.matrix.setTranslate(0.7, 0, 0.0);
+  leftArm.matrix.rotate(45, 0, 0, 1);
+  leftArm.matrix.scale(0.25, 0.7, 0.5);
+  leftArm.render();
+
+  // Test box
+  var box = new Cube();
+  box.color = [1, 0, 1, 1];
+  box.matrix.translate(0, 0, -0.5, 0);
+  box.matrix.rotate(-30, 1, 0, 0);
+  box.matrix.scale(0.5, 0.5, 0.5);
+  box.render();
+
   // Check the time at the end of the function, and show on web page
-  // var duration = perfomance.now() - startTime;
-  // sendTextForHTML("numdot: " + len + " ms " + Math.floor(duration) + " fps: " + Math.floor(10000 / duration), "numdot");
+  var duration = performance.now() - startTime;
+  sendTextToHTML(" ms: " + Math.floor(duration) + " fps: " + Math.floor(10000 / duration), "numdot");
 }
 
 // Set the text of a HTML element
-/*function sendTextToHTML(text, htmlID) {
-var htmlElm = document.getElementById(htmlID);
-if (!htmlElm) {
-console.log("Failed to get: " + htmlID + " from HTML");
-return;
+function sendTextToHTML(text, htmlID) {
+  var htmlElm = document.getElementById(htmlID);
+  if (!htmlElm) {
+    console.log("Failed to get: " + htmlID + " from HTML");
+    return;
+  }
+  htmlElm.innerHTML = text;
 }
-htmlElm.innerHTML = text;
-}*/
