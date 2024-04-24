@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CSE 160: Assignment 1 - Painting (Ismail Ahmed, iyahmed@ucsc.edu)</title>
+  </head>
+
+  <body onload="main()">
+    <canvas id="webgl" width="400" height="400">
+    Please use a browser that supports "canvas"
+    </canvas>
+    
+    <img src="Drawing.jpg" alt="A graphing paper drawing of the drawing that is rendered when clicking the drawing button.">
+
+    <h1>CSE 160: Assignment 1 - Painting (Ismail Ahmed, iyahmed@ucsc.edu)</h1>
+
+    <p>
+      <button type="button" id="green">Green</button>
+      <button type="button" id="red">Red</button>
+
+      <button type="button" id="clearButton">Clear</button>
+    </p>
+   
+    <button type="button" id="pointButton">Point</button>
+    <button type="button" id="triButton">Triangle</button>
+    <button type="button" id="circleButton">Circle</button>
+
+    <button type="button" id="drawingButton">Drawing</button>
+
+    <p>
+      Red <input type="range" min="0" max="100" value="100" class="slider" id="redSlide">
+    </p>
+    <p>
+      Green <input type="range" min="0" max="100" value="0" class="slider" id="greenSlide">
+    </p>
+    <p>
+      Blue <input type="range" min="0" max="100" value="0" class="slider" id="blueSlide">
+    </p>
+
+    <p>
+      Size <input type="range" min="5" max="40" value="0" class="slider" id="sizeSlide">
+    </p>
+    <p>
+      Segment <input type="range" min="10" max="50" value="0" class="slider" id="segmentSlide">
+    </p>
+   
+    <p>
+      Grader's Note: I did the normal functions needed for this assignment. As for the drawing, I used my imagination to make an abstract drawing of a diamond made by triangles, a Sun formed by triangles, and two reflected triangles. It is intended to be a painting. 
+    </p>
+    <script src="lib/webgl-utils.js"></script>
+    <script src="lib/webgl-debug.js"></script>
+    <script src="lib/cuon-utils.js"></script>
+    <script src="lib/cuon-matrix.js"></script>
+    <script src="Drawing.js"></script>
+    <script src="Triangle.js"></script>
+    <script src="Circle.js"></script>
+    <script src="Point.js"></script>
+    <script src="Cube.js"></script>
+    <script src="BlockyAnimal.js"></script>
+  </body>
+</html>
