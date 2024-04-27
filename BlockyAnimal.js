@@ -84,22 +84,22 @@ let g_selectedColor = [1.0, 0.0, 0.0, 1.0];
 let g_selectedSize = 5;
 let g_selectedType = POINT;
 let g_globalAngle = 0;
+let g_yellowAngle = 0;
+let g_magentaAngle = 0;
+let g_yellowAnimation = false;
+let g_magentaAnimation = false;
 
 // Set up actions for the HTMl UI elements
 function addActionsForHTMLUI() {
-  // Button Events (Shape Type)
-  document.getElementById('green').onclick = function () { g_selectedColor = [0.0, 1.0, 0.0, 1.0]; };
-  document.getElementById('red').onclick = function () { g_selectedColor = [1.0, 0.0, 0.0, 1.0]; };
-  document.getElementById('clearButton').onclick = function () { g_shapesList = []; renderAllShapes(); };
-
-  document.getElementById('pointButton').onclick = function () { g_selectedType = POINT };
-  document.getElementById('triButton').onclick = function () { g_selectedType = TRIANGLE };
-  document.getElementById('circleButton').onclick = function () { g_selectedType = CIRCLE };
+  // Button Events
+  document.getElementById('animationYellowOffButton').onclick = function () { g_yellowAnimation = false; };
+  document.getElementById('animationYellowOnButton').onclick = function () { g_yellowAnimation = true; };
+  document.getElementById('animationMagentaOffButton').onclick = function () { g_magentaAnimation = false; };
+  document.getElementById('animationMagentaOnButton').onclick = function () { g_magentaAnimation = true; };
 
   // Color Slider Events
-  document.getElementById('redSlide').addEventListener('mouseup', function () { g_selectedColor[0] = this.value / 100; });
-  document.getElementById('greenSlide').addEventListener('mouseup', function () { g_selectedColor[1] = this.value / 100; });
-  document.getElementById('blueSlide').addEventListener('mouseup', function () { g_selectedColor[2] = this.value / 100; });
+  document.getElementById('magentaSlide').addEventListener('mousemove', function () { g_magentaAngle = this.value; renderAllShapes(); });
+  document.getElementById('yellowSlide').addEventListener('mousemove', function () { g_yellowAngle = this.value; renderAllShapes(); });
 
   // Angle Slider Events
   // document.getElementById('angleSlide').addEventListener('mouseup', function () { g_globalAngle = this.value; renderAllShapes(); });
@@ -126,6 +126,36 @@ function main() {
   // Render
   //gl.clear(gl.COLOR_BUFFER_BIT);
   renderAllShapes();
+  requestAnimationFrame(tick);
+}
+
+var g_startTime = performance.now() / 1000.0;
+var g_seconds = performance.now() / 1000.0 - g_startTime;
+
+// Called by browser repeatedly whenever its time
+function tick() {
+  // Save the current time
+  g_seconds = performance.now() / 1000.0 - g_startTime;
+
+  // Update Animation Angles
+  updateAnimationAngles();
+
+  // Draw everything
+  renderAllShapes();
+
+  // Tell the browser to update again when it has time
+  requestAnimationFrame(tick);
+
+}
+
+// Update the angles of everything if currently animated
+function updateAnimationAngles() {
+  if (g_yellowAnimation === true) {
+    g_yellowAngle = (45 * Math.sin(g_seconds));
+  }
+  if (g_magentaAnimation === true) {
+    g_magentaAngle = (45 * Math.sin(3 * g_seconds));
+  }
 }
 
 var g_shapesList = [];
@@ -222,21 +252,46 @@ function renderAllShapes() {// I could not include the performance monitoring co
   body.render();
 
   // Draw a left arm
-  var leftArm = new Cube();
-  leftArm.color = [1, 1, 0, 1];
-  leftArm.matrix.setTranslate(0, -0.5, 0.0);
-  leftArm.matrix.rotate(-5, 1, 0, 0);
-  leftArm.matrix.scale(0.25, 0.7, 0.5);
-  leftArm.matrix.translate(-0.5, 0, 0);
-  leftArm.render();
+  var yellow = new Cube();
+  yellow.color = [1, 1, 0, 1];
+  yellow.matrix.setTranslate(0, -0.5, 0.0);
+  yellow.matrix.rotate(-5, 1, 0, 0);
+
+  yellow.matrix.rotate(-g_yellowAngle, 0, 0); // Custom rotation matrix
+
+  //  if (g_yellowAnimation === true) {
+  //  yellow.matrix.rotate(45 * Math.sin(g_seconds), 0, 0, 1); // Custom animation
+  //} else {
+  //  yellow.matrix.rotate(-g_yellowAngle, 0, 0); / / Custom rotation matrix
+  //}
+
+  var yellowCoordinatesMat = new Matrix4(yellow.matrix);
+  yellow.matrix.scale(0.25, 0.7, 0.5);
+  yellow.matrix.translate(-0.5, 0, 0);
+  yellow.render();
 
   // Test box
-  var box = new Cube();
-  box.color = [1, 0, 1, 1];
-  box.matrix.translate(-0.1, 0.1, 0, 0);
-  box.matrix.rotate(-30, 1, 0, 0);
-  box.matrix.scale(0.2, 0.4, 0.2);
-  box.render();
+  var magenta = new Cube();
+  magenta.color = [1, 0, 1, 1];
+  magenta.matrix = yellowCoordinatesMat; // Setting box to be leftArm's coordinates
+  magenta.matrix.translate(0, 0.65, 0);
+  magenta.matrix.rotate(g_magentaAngle, 0, 0, 1); // Custom rotation matrix
+  magenta.matrix.scale(0.3, 0.3, 0.3);
+  magenta.matrix.translate(-0.5, 0, - 0.001);
+  //magenta.matrix.translate(-0.1, 0.1, 0, 0);
+  //magenta.matrix.rotate(-30, 1, 0, 0);
+  //magenta.matrix.scale(0.2, 0.4, 0.2);
+  magenta.render();
+
+  // A bunch of rotating cubes
+  var K = 300.0;
+  for (var i = 1; i < K; i++) {
+    var c = new Cube();
+    c.matrix.translate(-0.8, 1.9 * i / K - 1.0, 0);
+    c.matrix.rotate(g_seconds * 100, 1, 1, 1);
+    c.matrix.scale(0.1, 0.5 / K, 1.0 / K);
+    c.render();
+  }
 
   // Check the time at the end of the function, and show on web page
   var duration = performance.now() - startTime;
