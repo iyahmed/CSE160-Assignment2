@@ -24,7 +24,6 @@ function setupWebGL() {
   canvas = document.getElementById('webgl');
 
   // Get the rendering context for WebGL
-  // gl = getWebGLContext(canvas);
   gl = canvas.getContext("webgl", { preserveDrawingBuffer: true });
   if (!gl) {
     console.log('Failed to get the rendering context for WebGL');
@@ -75,14 +74,8 @@ function connectVariablesToGLSL() {
 }
 
 // Constants
-const POINT = 0;
-const TRIANGLE = 1;
-const CIRCLE = 2;
 
 // Globals related to UI elements
-let g_selectedColor = [1.0, 0.0, 0.0, 1.0];
-let g_selectedSize = 5;
-let g_selectedType = POINT;
 let g_globalAngle = 0;
 let g_yellowAngle = 0;
 let g_magentaAngle = 0;
@@ -102,7 +95,6 @@ function addActionsForHTMLUI() {
   document.getElementById('yellowSlide').addEventListener('mousemove', function () { g_yellowAngle = this.value; renderAllShapes(); });
 
   // Angle Slider Events
-  // document.getElementById('angleSlide').addEventListener('mouseup', function () { g_globalAngle = this.value; renderAllShapes(); });
   document.getElementById('angleSlide').addEventListener('mousemove', function () { g_globalAngle = this.value; renderAllShapes(); });
 }
 
@@ -117,14 +109,12 @@ function main() {
 
   // Register function (event handler) to be called on a mouse press
   canvas.onmousedown = click;
-  //canvas.onmousemove = click;
   canvas.onmousemove = function (ev) { if (ev.buttons == 1) { click(ev); } };
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
   // Render
-  //gl.clear(gl.COLOR_BUFFER_BIT);
   renderAllShapes();
   requestAnimationFrame(tick);
 }
@@ -145,7 +135,6 @@ function tick() {
 
   // Tell the browser to update again when it has time
   requestAnimationFrame(tick);
-
 }
 
 // Update the angles of everything if currently animated
@@ -161,63 +150,11 @@ function updateAnimationAngles() {
 var g_shapesList = [];
 
 function click(ev) {
-  [x, y] = convertCoordinatesEventToGL(ev);
-
-  // Create and store the new point
-  let point;
-  if (g_selectedType == POINT) {
-    point = new Point();
-    point.position = [x, y];
-    point.color = g_selectedColor.slice();
-    point.size = g_selectedSize;
-    point.segment = g_selectedSegment;
-    g_shapesList.push(point);
-  } else if (g_selectedType == TRIANGLE) {
-    point = new Triangle();
-    point.position = [x, y];
-    point.color = g_selectedColor.slice();
-    point.size = g_selectedSize;
-    point.segment = g_selectedSegment;
-    g_shapesList.push(point);
-  } else if (g_selectedType == CIRCLE) {
-    point = new Circle();
-    point.position = [x, y];
-    point.color = g_selectedColor.slice();
-    point.size = g_selectedSize;
-    point.segment = g_selectedSegment;
-    g_shapesList.push(point);
-  } else if (g_selectedType == DRAWING) {
-    // Draw a diamond at the center
-    let diamond = new Rectangle();
-    diamond.position = [0, 0];
-    diamond.color = g_selectedColor.slice();
-    diamond.size = 40;
-    diamond.segment = g_selectedSegment;
-    g_shapesList.push(diamond);
-
-    // Draw two reflected triangles at the center
-    let reflected = new Rectangle();
-    reflected.position = [0.5, 0];
-    reflected.color = g_selectedColor.slice();
-    reflected.size = 40;
-    reflected.segment = g_selectedSegment;
-    g_shapesList.push(reflected);
-
-    // Draw a yellow Sun circle at the top
-    let circle = new Circle();
-    circle.position = [0.0, 0.5];
-    circle.color = [1.0, 1.0, 0.0, 1.0];
-    circle.size = 40;
-    circle.segment = 16;
-    g_shapesList.push(circle);
-  }
-
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   //Draw every shape that is supposed to be in the canvas
   renderAllShapes();
-
 }
 
 function convertCoordinatesEventToGL(ev) {
@@ -231,7 +168,7 @@ function convertCoordinatesEventToGL(ev) {
   return ([x, y]);
 }
 
-function renderAllShapes() {// I could not include the performance monitoring code because I do not have NodeJS setup
+function renderAllShapes() {
   // Check the time at the start of the function
   var startTime = performance.now();
 
@@ -259,12 +196,6 @@ function renderAllShapes() {// I could not include the performance monitoring co
 
   yellow.matrix.rotate(-g_yellowAngle, 0, 0); // Custom rotation matrix
 
-  //  if (g_yellowAnimation === true) {
-  //  yellow.matrix.rotate(45 * Math.sin(g_seconds), 0, 0, 1); // Custom animation
-  //} else {
-  //  yellow.matrix.rotate(-g_yellowAngle, 0, 0); / / Custom rotation matrix
-  //}
-
   var yellowCoordinatesMat = new Matrix4(yellow.matrix);
   yellow.matrix.scale(0.25, 0.7, 0.5);
   yellow.matrix.translate(-0.5, 0, 0);
@@ -278,20 +209,7 @@ function renderAllShapes() {// I could not include the performance monitoring co
   magenta.matrix.rotate(g_magentaAngle, 0, 0, 1); // Custom rotation matrix
   magenta.matrix.scale(0.3, 0.3, 0.3);
   magenta.matrix.translate(-0.5, 0, - 0.001);
-  //magenta.matrix.translate(-0.1, 0.1, 0, 0);
-  //magenta.matrix.rotate(-30, 1, 0, 0);
-  //magenta.matrix.scale(0.2, 0.4, 0.2);
   magenta.render();
-
-  // A bunch of rotating cubes
-  var K = 300.0;
-  for (var i = 1; i < K; i++) {
-    var c = new Cube();
-    c.matrix.translate(-0.8, 1.9 * i / K - 1.0, 0);
-    c.matrix.rotate(g_seconds * 100, 1, 1, 1);
-    c.matrix.scale(0.1, 0.5 / K, 1.0 / K);
-    c.render();
-  }
 
   // Check the time at the end of the function, and show on web page
   var duration = performance.now() - startTime;
