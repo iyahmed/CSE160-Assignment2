@@ -138,26 +138,26 @@ function addActionsForHTMLUI() {
   document.getElementById('animationTailOnButton').onclick = function () { g_tailAnimation = true; };
   
   // Front-Left Leg's Color Slider Events
-  document.getElementById('frontLeftLegPawSlide').addEventListener('mousemove', function () { g_frontLeftLegPawAngle = this.value; renderAllShapes(); });
-  document.getElementById('frontLeftLegThighSlide').addEventListener('mousemove', function () { g_frontLeftLegThighAngle = this.value; renderAllShapes(); });
+  document.getElementById('frontLeftLegPawSlide').addEventListener('mousemove', function () { g_frontLeftLegPawAngle = this.value; renderScene(); });
+  document.getElementById('frontLeftLegThighSlide').addEventListener('mousemove', function () { g_frontLeftLegThighAngle = this.value; renderScene(); });
   
   // Front-Right Leg's Color Slider Events
-  document.getElementById('frontRightLegPawSlide').addEventListener('mousemove', function () { g_frontRightLegPawAngle = this.value; renderAllShapes(); });
-  document.getElementById('frontRightLegThighSlide').addEventListener('mousemove', function () { g_frontRightLegThighAngle = this.value; renderAllShapes(); });
+  document.getElementById('frontRightLegPawSlide').addEventListener('mousemove', function () { g_frontRightLegPawAngle = this.value; renderScene(); });
+  document.getElementById('frontRightLegThighSlide').addEventListener('mousemove', function () { g_frontRightLegThighAngle = this.value; renderScene(); });
 
   // Back-Left Leg's Color Slider Events
-  document.getElementById('backLeftLegPawSlide').addEventListener('mousemove', function () { g_backLeftLegPawAngle = this.value; renderAllShapes(); });
-  document.getElementById('backLeftLegThighSlide').addEventListener('mousemove', function () { g_backLeftLegThighAngle = this.value; renderAllShapes(); });
+  document.getElementById('backLeftLegPawSlide').addEventListener('mousemove', function () { g_backLeftLegPawAngle = this.value; renderScene(); });
+  document.getElementById('backLeftLegThighSlide').addEventListener('mousemove', function () { g_backLeftLegThighAngle = this.value; renderScene(); });
 
   // Back-Right Leg's Color Slider Events
-  document.getElementById('backRightLegPawSlide').addEventListener('mousemove', function () { g_backRightLegPawAngle = this.value; renderAllShapes(); });
-  document.getElementById('backRightLegThighSlide').addEventListener('mousemove', function () { g_backRightLegThighAngle = this.value; renderAllShapes(); });
+  document.getElementById('backRightLegPawSlide').addEventListener('mousemove', function () { g_backRightLegPawAngle = this.value; renderScene(); });
+  document.getElementById('backRightLegThighSlide').addEventListener('mousemove', function () { g_backRightLegThighAngle = this.value; renderScene(); });
   
   // Tail's Color Slider Events
-  document.getElementById('tailSlide').addEventListener('mousemove', function () { g_TailAngle = this.value; renderAllShapes(); });
+  document.getElementById('tailSlide').addEventListener('mousemove', function () { g_TailAngle = this.value; renderScene(); });
 
   // Angle Slider Events
-  document.getElementById('angleSlide').addEventListener('mousemove', function () { g_globalAngle = this.value; renderAllShapes(); });
+  document.getElementById('angleSlide').addEventListener('mousemove', function () { g_globalAngle = this.value; renderScene(); });
 }
 
 
@@ -175,7 +175,7 @@ function main() {
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
   // Render
-  renderAllShapes();
+  renderScene();
   requestAnimationFrame(tick);
 }
 
@@ -193,7 +193,7 @@ function tick() {
   updateAnimationAngles();
 
   // Draw everything
-  renderAllShapes();
+  renderScene();
 
   // Tell the browser to update again when it has time
   requestAnimationFrame(tick);
@@ -263,7 +263,7 @@ function updateAnimationAngles() {
 var g_shapesList = [];
 
 
-function renderAllShapes() {
+function renderScene() {
   // Check the time at the start of the function
   var startTime = performance.now();
 
