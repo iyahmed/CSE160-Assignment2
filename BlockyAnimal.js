@@ -123,6 +123,7 @@ function addActionsForHTMLUI() {
 
   // Back-Left Leg's Button Events
   document.getElementById('animationbackLeftLegThighOnButton').onclick = function () { g_backLeftLegThighAnimation = true; };
+  document.getElementById('animationbackLeftLegThighOffButton').onclick = function () { g_backLeftLegThighAnimation = false; };
   document.getElementById('animationbackLeftLegPawOffButton').onclick = function () { g_backLeftLegPawAnimation = false; };
   document.getElementById('animationbackLeftLegPawOnButton').onclick = function () { g_backLeftLegPawAnimation = true; };
 
@@ -201,34 +202,61 @@ function tick() {
 
 // Update the angles of everything if currently animated
 function updateAnimationAngles() {
-  // Delaying movement of the right side compared to left side for realism
+  // Delaying movement of the right legs compared to the left legs for realism
   if (g_frontLeftLegThighAnimation === true) {
     g_frontLeftLegThighAngle = (30 * Math.sin(g_seconds));
+  }
+  if (g_frontLeftLegThighAnimation === false) {
+    g_frontLeftLegThighAngle = 0;
   }
   if (g_frontLeftLegPawAnimation === true) {
     g_frontLeftLegPawAngle = (30 * Math.sin(3 * g_seconds));
   }
+  if (g_frontLeftLegPawAnimation === false) {
+    g_frontLeftLegPawAngle = 0;
+  }
   if (g_frontRightLegThighAnimation === true) {
     g_frontRightLegThighAngle = (30 * Math.cos(g_seconds));
+  }
+  if (g_frontRightLegThighAnimation === false) {
+    g_frontRightLegThighAngle = 0;
   }
   if (g_frontRightLegPawAnimation === true) {
     g_frontRightLegPawAngle = (30 * Math.cos(3 * g_seconds));
   }
+  if (g_frontRightLegPawAnimation === false) {
+    g_frontRightLegPawAngle = 0;
+  }
   if (g_backLeftLegThighAnimation === true) {
     g_backLeftLegThighAngle = (30 * Math.sin(g_seconds));
+  }
+  if (g_backLeftLegThighAnimation === false) {
+    g_backLeftLegThighAngle = 0;
   }
   if (g_backLeftLegPawAnimation === true) {
     g_backLeftLegPawAngle = (30 * Math.sin(3 * g_seconds));
   }
+  if (g_backLeftLegPawAnimation === false) {
+    g_backLeftLegPawAngle = 0;
+  }
   if (g_backRightLegThighAnimation === true) {
     g_backRightLegThighAngle = (30 * Math.cos(g_seconds));
+  }
+  if (g_backRightLegThighAnimation === false) {
+    g_backRightLegThighAngle = 0;
   }
   if (g_backRightLegPawAnimation === true) {
     g_backRightLegPawAngle = (30 * Math.cos(3 * g_seconds));
   }
-  if (g_tailAnimation === true) {
-    g_tailAngle = (60 * Math.cos(g_seconds)); // Double the speed of walking with a leg
+  if (g_backRightLegPawAnimation === false) {
+    g_backRightLegPawAngle = 0;
   }
+  if (g_tailAnimation === true) {
+    g_tailAngle = (60 * Math.cos(g_seconds)); // The speed of tail-wagging is doubled compared to the speed of walking with a leg for realism
+  }
+  if (g_tailAnimation === false) {
+    g_tailAngle = 0;
+  }  
 }
 
 
@@ -363,9 +391,7 @@ function renderAllShapes() {
   tail.matrix.translate(0.45, 0.5, 0.15); // X and Z placement for the tail
   tail.matrix.rotate(-0.75, 1, 0, 0); // Rotation for the tail
   tail.matrix.rotate(-g_tailAngle, 0, 0); // Setting the animation rotation for the tail
-  tail.matrix.scale(0.2, 0.4, 0.2); // Flipping the tail vertically and scaling it by 1/2th
-  /*tail.matrix.scale(0.25, 0.75, 0.25); // Setting the custom 1/4th, 3/4th, 1/4th scale for the tail
-  tail.matrix.translate(-0.5, 0, 0); // Setting the custom X placement for the bottom tail*/
+  tail.matrix.scale(0.2, 0.4, 0.2); // Flipping the tail vertically and scaling it by a 1/5th, 2/5th, 1/5th scale
   tail.render(); // Rendering the bottom tail
 
   // Check the time at the end of the function, and show on web page
